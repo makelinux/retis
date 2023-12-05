@@ -74,6 +74,11 @@ impl Event {
         }
     }
 
+    #[allow(clippy::borrowed_box)]
+    pub(super) fn get(&self, owner: ModuleId) -> Option<&Box<dyn EventSection>> {
+        self.0.get(&owner)
+    }
+
     pub(crate) fn to_json(&self) -> serde_json::Value {
         let mut event = serde_json::Map::new();
 
@@ -188,6 +193,7 @@ impl<T> EventSection for T where T: EventSectionInternal + for<'a> EventDisplay<
 pub(crate) trait EventSectionInternal {
     fn as_any(&self) -> &dyn Any;
     fn to_json(&self) -> serde_json::Value;
+    fn to_py(&self, py: pyo3::Python<'_>) -> pyo3::PyObject;
 }
 
 // We need this as the value given as the input when deserializing something
@@ -199,6 +205,10 @@ impl EventSectionInternal for () {
 
     fn to_json(&self) -> serde_json::Value {
         serde_json::Value::Null
+    }
+
+    fn to_py(&self, py: pyo3::Python<'_>) -> pyo3::PyObject {
+        py.None()
     }
 }
 
