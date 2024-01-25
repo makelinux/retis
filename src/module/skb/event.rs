@@ -434,7 +434,10 @@ pub(crate) struct SkbPacketEvent {
 
 #[derive(Default)]
 #[event_section_factory(SkbEvent)]
-pub(crate) struct SkbEventFactory {}
+pub(crate) struct SkbEventFactory {
+    // Should we report the Ethernet header.
+    pub(super) report_eth: bool,
+}
 
 impl RawEventSectionFactory for SkbEventFactory {
     fn from_raw(&mut self, raw_sections: Vec<BpfRawSection>) -> Result<Box<dyn EventSection>> {
@@ -446,7 +449,7 @@ impl RawEventSectionFactory for SkbEventFactory {
                 SECTION_NS => event.ns = Some(unmarshal_ns(section)?),
                 SECTION_META => event.meta = Some(unmarshal_meta(section)?),
                 SECTION_DATA_REF => event.data_ref = Some(unmarshal_data_ref(section)?),
-                SECTION_PACKET => unmarshal_packet(&mut event, section)?,
+                SECTION_PACKET => unmarshal_packet(&mut event, section, self.report_eth)?,
                 _ => bail!("Unknown data type"),
             }
         }
