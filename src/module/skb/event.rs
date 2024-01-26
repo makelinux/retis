@@ -450,7 +450,7 @@ impl RawEventSectionFactory for SkbEventFactory {
                 SECTION_META => event.meta = Some(unmarshal_meta(section)?),
                 SECTION_DATA_REF => event.data_ref = Some(unmarshal_data_ref(section)?),
                 SECTION_PACKET => unmarshal_packet(&mut event, section, self.report_eth)?,
-                _ => bail!("Unknown data type"),
+                x => bail!("Unknown data type ({x})"),
             }
         }
 
